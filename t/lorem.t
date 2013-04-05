@@ -8,14 +8,20 @@ use Data::Faker;
 
 my $object = Data::Faker->new;
 
-ok( my $word = $object->words, "Got a word" );
-is( my @quux = split( /\s+/, $word ), 1, "There was 1 word" );
-ok( my $words = $object->words(3), "Got some words" );
-is( my @foo = split( /\s+/, $words ), 3, "There were 3 words" );
-ok( my $sentences = $object->sentences(3), "Got some sentences" );
-is( my @bar = split( /\./, $sentences ), 3, "There were 3 sentences" );
-ok( my $paragraphs = $object->paragraphs(4), "Got some paragraphs" );
-is( my @baz = split( /\n\n/, $paragraphs ), 4, "There were 4 paragraphs" );
+my @cases = ( [qw/words 1/], [qw/words 2/], [qw/sentences 3/], [qw/paragraphs 4/], );
+
+my %splitter = (
+    words      => qr/\s+/,
+    sentences  => qr/\./,
+    paragraphs => qr/\n\n/,
+);
+
+for my $c (@cases) {
+    my ( $method, $count ) = @$c;
+    my $string = $object->$method($count);
+    my @parts = split $splitter{$method}, $string;
+    is( scalar @parts, $count, "$method($count) count correct" ) or diag explain \@parts;
+}
 
 done_testing;
 # COPYRIGHT
